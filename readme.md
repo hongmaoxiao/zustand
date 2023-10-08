@@ -4,7 +4,7 @@
 
     npm install zustand
 
-Small, fast and scaleable bearbones state-management solution. Has a comfy api based on hooks, isn't that boilerplatey or opinionated, but still just enough to be explicit and flux-like, breaches reconciler boundaries. You can check out a small live demo [here](https://codesandbox.io/s/v8pjv251w7).
+Small, fast and scaleable barebones state-management solution. Has a comfy api based on hooks, isn't that boilerplatey or opinionated, but still just enough to be explicit and flux-like, breaches reconciler boundaries (React context cannot pass into react-three-fiber, react-konva, etc).
 
 #### Create a store (or multiple, up to you...)
 
@@ -80,7 +80,7 @@ const person = usePersonStore(state => state.persons[currentUser])
 
 ## Memoizing selectors (this is completely optional)
 
-You can change the selector always! But since you essentially pass a new function every render it will subscribe and unsubscribe to the store every time. Most of the time it will bearly make a difference, but when you're dealing with dozens of connected components it is a good habit to memoize your selectors with an optional second argument that's similar to Reacts useCallback. Give it the dependencies you are interested in and it will let your selector in peace, which is faster and saves memory.
+You can change the selector always! But since you essentially pass a new function every render it will subscribe and unsubscribe to the store every time. It's not that much of a big deal, unless you're dealing with hundreds of connected components. But you can still memoize your selector with an optional second argument that's similar to Reacts useCallback. Give it the dependencies you are interested in and it will let your selector in peace.
 
 ```jsx
 const book = useBookStore(state => state.books[title], [title])
@@ -117,13 +117,10 @@ const [useStore] = create((set, get) => ({
 
 ## Sick of reducers and changing nested state? Use Immer!
 
-Having to construct nested structes bearhanded is one of the worst aspects of reducing state. Try [immer](https://github.com/mweststrate/immer)! It is a tiny package that allows you to work with immutable state in a more convenient way. You can easily extend your store with it.
-
 ```jsx
 import produce from "immer"
 
 const [useStore] = create(set => ({
-  set: fn => set(produce(fn)),
   nested: {
     structure: {
       constains: {
@@ -131,12 +128,9 @@ const [useStore] = create(set => ({
       }
     }
   },
-})
-
-const set = useStore(state => state.set)
-set(draft => {
-  draft.nested.structure.contains.a.value = false
-  draft.nested.structure.contains.anotherValue = true
+  action: () => set(produce(draft => {
+    draft.nested.structure.contains.a.value = undefined // not anymore ...
+  }))
 })
 ```
 
@@ -145,16 +139,12 @@ set(draft => {
 You can use it with or without React out of the box.
 
 ```jsx
-const [, api] = create(set => ({ n: 0, setN: n => set({ n }) }))
+const [, api] = create(...)
 
-// Getting fresh state
-const n = api.getState().n
 // Listening to changes
-const unsub = api.subscribe(state => console.log(state.n))
-// Updating state, will trigger listeners
-api.getState().setN(1)
-// Unsubscribing handler
-unsub()
+api.subscribe(state => console.log("i log whenever state changes", state))
+// Getting fresh state
+const state = api.getState()
 // Destroying the store
 api.destroy()
 ```
