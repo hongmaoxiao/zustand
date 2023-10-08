@@ -41,11 +41,7 @@ export default function create(fn) {
           // console.log('selected 2222: ', selected)
           // console.log('sliceRef.current !== selected: ', sliceRef.current !== selected)
           // If state is not a atomic shallow equal it
-          if (
-            sliceRef.current !== selected &&
-            typeof selected === 'object' &&
-            !Array.isArray(selected)
-          ) {
+          if (sliceRef.current !== selected && selected === Object(selected)) {
             // console.log('in update here 111----: ', selected)
             selected = Object.entries(selected).reduce(
               (acc, [key, value]) =>
