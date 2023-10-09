@@ -4,9 +4,11 @@
 
     npm install zustand
 
-Small, fast and scaleable bearbones state-management solution. Has a comfy api based on hooks, isn't that boilerplatey or opinionated, but still just enough to be explicit and flux-like, breaches reconciler boundaries and is cross-platform to boot. Make your paws dirty with a small live demo [here](https://codesandbox.io/s/v8pjv251w7).
+Small, fast and scaleable bearbones state-management solution. Has a comfy api based on hooks, isn't that boilerplatey or opinionated, but still just enough to be explicit and flux-like, not context based (no reliance on providers, breaches reconciler boundaries), and is cross-platform to boot. Make your paws dirty with a small live demo [here](https://codesandbox.io/s/v8pjv251w7).
 
 #### Create a store (or multiple, up to you...)
+
+You could be in global or component scope, manage your store anywhere you want!
 
 ```jsx
 import create from 'zustand'
@@ -24,6 +26,8 @@ const [useStore] = create(set => ({
 ```
 
 #### Bind components
+
+Look Ma, no providers!
 
 ```jsx
 function Counter() {
@@ -44,7 +48,7 @@ function Controls() {
 }
 ```
 
-# Receipes
+# Recipes
 
 ## Fetching everything
 
@@ -138,6 +142,31 @@ set(draft => {
   draft.nested.structure.contains.a.value = false
   draft.nested.structure.contains.anotherValue = true
 })
+```
+
+## Can't live without redux-like reducers and action types?
+
+```jsx
+const types {
+  increase: "INCREASE",
+  decrease: "DECREASE"
+}
+
+const reducer = (state, { type, ...payload }) => {
+  switch (type) {
+    case types.increase: return { ...state, count: state.count + 1 }
+    case types.decrease: return { ...state, count: state.count - 1 } 
+  }
+  return state
+}
+
+const [useStore] = create((set, get) => ({
+  count: 0,
+  dispatch: args => set(state => reducer(state, args)),
+})
+
+const dispatch = useStore(state => state.dispatch)
+dispatch({ type: types.increase })
 ```
 
 ## Reading/writing state and reacting to changes outside of components
