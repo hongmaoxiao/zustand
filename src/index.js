@@ -75,9 +75,9 @@ function shallowEqual(objA, objB) {
     return true
   }
   if (
-    typeof objA === 'object' ||
+    typeof objA !== 'object' ||
     objA === null ||
-    typeof objB === 'object' ||
+    typeof objB !== 'object' ||
     objB === null
   ) {
     return false
