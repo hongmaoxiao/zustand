@@ -41,7 +41,8 @@ export default function create<
     // Gets entire state if no selector was passed in
     const selectState = typeof selector === 'function' ? selector : getState
     // Using functional initial b/c selected itself could be a function
-    const [stateSlice, setStateSlice] = React.useState(() => selectState(state))
+    const [, forceUpdate] = React.useState({})
+    const stateSlice = selectState(state)
     // Prevent useEffect from needing to run when values change by storing them in a ref object
     const refs = React.useRef({ stateSlice, selectState }).current
 
@@ -55,7 +56,8 @@ export default function create<
         // Get fresh selected state
         const selected = refs.selectState(state)
         if (!shallowEqual(refs.stateSlice, selected)) {
-          setStateSlice(() => selected)
+          refs.stateSlice = selected
+          forceUpdate({})
         }
       })
     }, [])

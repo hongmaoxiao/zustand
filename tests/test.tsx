@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
   cleanup,
   fireEvent,
@@ -38,7 +38,7 @@ it('updates the store', () => {
     renderCount++
     const { count, dec } = useStore()
 
-    useEffect(dec, [])
+    React.useEffect(dec, [])
 
     if (renderCount === 1) {
       expect(count).toBe(1)
@@ -82,7 +82,7 @@ it('can subscribe to part of the store', async () => {
 
   fireEvent.click(getByText('button'))
 
-  await waitForElement(() => getByText('1'))
+  await waitForElement(() => getByText('2'))
 
   expect(counterRenderCount).toBe(2)
   expect(controlsRenderCount).toBe(1)
@@ -135,7 +135,6 @@ it('can destroy the store', () => {
   }))
 
   subscribe(() => {
-    console.log('innnn')
     throw new Error('did not clear listener on destroy')
   })
   destroy()
@@ -143,4 +142,21 @@ it('can destroy the store', () => {
   // should this throw?
   setState({ value: 2 })
   expect(getState().value).toEqual(2)
+})
+
+it('can update the selector even when the store does not change', async () => {
+  const [useStore] = create(() => ({
+    one: 'one',
+    two: 'two',
+  }))
+
+  function Component({ selector }) {
+    return <div>{useStore(selector)}</div>
+  }
+
+  const { getByText, rerender } = render(<Component selector={s => s.one} />)
+  await waitForElement(() => getByText('one'))
+
+  rerender(<Component selector={s => s.two} />)
+  await waitForElement(() => getByText('two'))
 })
