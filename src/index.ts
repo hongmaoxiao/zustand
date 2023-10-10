@@ -45,12 +45,10 @@ export default function create<
     // Prevent useEffect from needing to run when values change by storing them in a ref object
     const refs = React.useRef({ stateSlice, selectState }).current
 
-    if (refs.stateSlice !== stateSlice) {
+    React.useEffect(() => {
       refs.stateSlice = stateSlice
-    }
-    if (refs.selectState !== selectState) {
       refs.selectState = selectState
-    }
+    }, [stateSlice, selectState])
 
     React.useEffect(() => {
       return subscribe(() => {
